@@ -1,0 +1,29 @@
+{
+  "name": "intro-to-backend",
+  "version": "1.0.0",
+  "description": "tutorial to intro to backend",
+  "homepage": "https://github.com/Dejene4971/intro-to-backend#readme",
+  "bugs": {
+    "url": "https://github.com/Dejene4971/intro-to-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dejene4971/intro-to-backend.git"
+  },
+  "license": "ISC",
+  "author": "Dejene",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node backend/src/index.js",
+    "dev": "nodemon backend/src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^7.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
