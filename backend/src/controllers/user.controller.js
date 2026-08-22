@@ -1,45 +1,111 @@
 import { User } from "../models/user.model.js";
+import jwt from "jsonwebtoken";
 
 const registerUser = async (req, res) => {
   try {
-    const { username, password, email } = req.body;
+    const { username, email, password } = req.body || {};
 
-    
-    if (!username || !password || !email) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!username || !email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Username, email, and password are required" });
     }
 
-    // Check if user already exists
+    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (password.length < 6 || password.length > 50) {
+      return res
+        .status(400)
+        .json({ message: "Password must be between 6 and 50 characters" });
+    }
+
+    const existingUser = await User.findOne({
+      $or: [{ username: normalizedUsername }, { email: normalizedEmail }],
+    });
+
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(409)
+        .json({ message: "Username or email is already in use" });
     }
 
-    
-    // Create new user
-    const newUser = await User({ 
-        username, 
-        password, 
-        email: email.toLowerCase(), 
+    const user = await User.create({
+      username: normalizedUsername,
+      email: normalizedEmail,
+      password,
     });
-    await newUser.save();
 
-    res.status(201).json({ 
-        message: "User registered successfully",
-        newUser: {
-            id: newUser._id,
-            username: newUser.username,
-            email: newUser.email,
-        }
+    const { password: _, __v, ...safeUser } = user.toObject();
 
-    
+    return res.status(201).json({
+      message: "Registration successful",
+      user: safeUser,
     });
-  } 
-  catch (error) {
-    console.error("Error registering user:", error);
-    res.status(500).json({ message: "Internal server error" });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res
+        .status(409)
+        .json({ message: "Username or email is already in use" });
+    }
+
+    console.error("Registration error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export { registerUser };
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user || !user.password) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not configured");
+      return res.status(500).json({ message: "Server authentication is not configured" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const { password: _, __v, ...safeUser } = user.toObject();
+
+    return res
+      .status(200)
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .json({ message: "Login successful", user: safeUser });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const logoutUser = (req, res) => {
+  return res
+    .status(200)
+    .clearCookie("token")
+    .json({ message: "Logout successful" });
+};
+
+export { registerUser, loginUser, logoutUser };
