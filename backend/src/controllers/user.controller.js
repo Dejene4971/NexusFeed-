@@ -11,7 +11,7 @@ const registerUser = async (req, res) => {
         .json({ message: "Username, email, and password are required" });
     }
 
-    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedUsername = username.trim ().toLowerCase();
     const normalizedEmail = email.trim().toLowerCase();
 
     if (password.length < 6 || password.length > 50) {
