@@ -2,7 +2,7 @@ import { Post } from "../models/post.model.js";
 
 //Create post
 
-const createPost = async (req, res) =>{
+const createPost = async (req, res, next) =>{
     try{
     const {name, description, age} = req.body;
     if(!name || !description || !age){
@@ -17,13 +17,8 @@ const createPost = async (req, res) =>{
         message:"post created succesfully!"
     });
 
-    }catch(error)
-    {
-        res.status(500).json({
-            message:"Internal server Error"
-        })
-
-
+    } catch (error) {
+        next(error);
     }
     
 
@@ -31,7 +26,7 @@ const createPost = async (req, res) =>{
 
 //get/read all posts.
 
-const getAllPosts = async (req, res) => {
+const getAllPosts = async (req, res, next) => {
     try {
         const getPosts = await Post.find();    
         res.status(200).json({
@@ -39,13 +34,11 @@ const getAllPosts = async (req, res) => {
             data: getPosts
         });
     } catch (error) {
-        res.status(500).json({
-            message: "Internal server error"
-        });
+        next(error);
     }
 };
 
-const updatePost = async (req, res) => {
+const updatePost = async (req, res, next) => {
     try {
         //basic validation
 
@@ -76,14 +69,12 @@ const updatePost = async (req, res) => {
             data: post
         })
 
-    }catch (error){
-        res.status(500).json({
-            message: "Internal server error"
-        });
+    } catch (error) {
+        next(error);
     }
     
 };
-const deletePost = async (req, res) => {
+const deletePost = async (req, res, next) => {
     try {
         const post = await Post.findByIdAndDelete(req.params.id);
         if(!post){
@@ -96,9 +87,7 @@ const deletePost = async (req, res) => {
             data: post
         })
     } catch (error) {
-        res.status(500).json({
-            message: "Internal server error"
-        });
+        next(error);
     }
 };
 

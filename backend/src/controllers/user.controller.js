@@ -1,7 +1,7 @@
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
   try {
     const { username, email, password } = req.body || {};
 
@@ -43,18 +43,11 @@ const registerUser = async (req, res) => {
       user: safeUser,
     });
   } catch (error) {
-    if (error.code === 11000) {
-      return res
-        .status(409)
-        .json({ message: "Username or email is already in use" });
-    }
-
-    console.error("Registration error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body || {};
 
@@ -96,8 +89,7 @@ const loginUser = async (req, res) => {
       })
       .json({ message: "Login successful", user: safeUser });
   } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
