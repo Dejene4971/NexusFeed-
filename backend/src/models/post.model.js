@@ -21,9 +21,16 @@ import mongoose, { Schema } from "mongoose";
             min:1,
             max:150
 
-        }
+        },
+        author: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        },
 
     },
+
+    
     {
         timestamps : true
     }

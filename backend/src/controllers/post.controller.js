@@ -11,7 +11,7 @@ const createPost = async (req, res, next) =>{
         });
     } 
     const post = await Post.create({
-        name, description, age
+        name, description, age, author: req.user._id,
     })
     res.status(201).json({
         message:"post created succesfully!"
@@ -28,9 +28,42 @@ const createPost = async (req, res, next) =>{
 
 const getAllPosts = async (req, res, next) => {
     try {
-        const getPosts = await Post.find();    
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.max(1, Math.min(100, parseInt(req.query.limit) || 10));
+        const skip = (page - 1) * limit;
+        const search = req.query.search ? req.query.search.trim() : "";
+        const sortBy = req.query.sort || "newest";
+
+        let query = {};
+        if (search) {
+          query.$or = [
+            { name: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+          ];
+        }
+
+        let sortOrder = {};
+        if (sortBy === "oldest") {
+          sortOrder = { createdAt: 1 };
+        } else {
+          sortOrder = { createdAt: -1 };
+        }
+
+        const total = await Post.countDocuments(query);
+        const getPosts = await Post.find(query)
+          .sort(sortOrder)
+          .skip(skip)
+          .limit(limit)
+          .populate("author", "username email");
+
         res.status(200).json({
             message: "Posts fetched successfully",
+            pagination: {
+              total,
+              page,
+              limit,
+              pages: Math.ceil(total / limit),
+            },
             data: getPosts
         });
     } catch (error) {
