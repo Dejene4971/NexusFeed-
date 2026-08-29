@@ -56,4 +56,22 @@ const validatePost = (req, res, next) => {
   next();
 };
 
-export { validateRegister, validateLogin, validatePost };
+const validatePostQuery = (req, res, next) => {
+  const { page, limit, sort } = req.query;
+
+  if (page !== undefined && (!/^\d+$/.test(page) || Number(page) < 1)) {
+    return next(createValidationError("Page must be a positive integer"));
+  }
+
+  if (limit !== undefined && (!/^\d+$/.test(limit) || Number(limit) < 1 || Number(limit) > 100)) {
+    return next(createValidationError("Limit must be an integer between 1 and 100"));
+  }
+
+  if (sort !== undefined && !["newest", "oldest"].includes(sort)) {
+    return next(createValidationError("Sort must be either newest or oldest"));
+  }
+
+  next();
+};
+
+export { validateRegister, validateLogin, validatePost, validatePostQuery };

@@ -14,6 +14,7 @@ const createPost = async (req, res, next) =>{
         name, description, age, author: req.user._id,
     })
     res.status(201).json({
+        success: true,
         message:"post created succesfully!"
     });
 
@@ -57,6 +58,7 @@ const getAllPosts = async (req, res, next) => {
           .populate("author", "username email");
 
         res.status(200).json({
+            success: true,
             message: "Posts fetched successfully",
             pagination: {
               total,
@@ -65,6 +67,28 @@ const getAllPosts = async (req, res, next) => {
               pages: Math.ceil(total / limit),
             },
             data: getPosts
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getPostById = async (req, res, next) => {
+    try {
+        const post = await Post.findById(req.params.id)
+            .populate("author", "username email");
+
+        if (!post) {
+            return res.status(404).json({
+                success: false,
+                message: "Post not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Post fetched successfully",
+            data: post
         });
     } catch (error) {
         next(error);
@@ -98,6 +122,7 @@ const updatePost = async (req, res, next) => {
             });
         }
         res.status(200).json({
+            success: true,
             message: "post updated successfully",
             data: post
         })
@@ -116,6 +141,7 @@ const deletePost = async (req, res, next) => {
             });
         }
         res.status(200).json({
+            success: true,
             message: "post deleted successfully",
             data: post
         })
@@ -127,6 +153,7 @@ const deletePost = async (req, res, next) => {
 export {
     createPost,
     getAllPosts,
+    getPostById,
     updatePost,
     deletePost
 };

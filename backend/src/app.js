@@ -11,24 +11,28 @@ import postRouter from "./routes/post.route.js";
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 app.use(cors());
 app.use(helmet());
 
-// Apply rate limiting to all requests
-const limiter = rateLimit({
+const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 10,
   message: {
     success: false,
     message: "Too many authentication attempts. Try again later.",
   },
 });
-app.use(limiter);
+app.use("/api/v1/users/login", authLimiter);
+app.use("/api/v1/users/register", authLimiter);
 
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/posts", postRouter);
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ success: true, message: "API is healthy" });
+});
 
 app.use(notFoundHandler);
 app.use(errorHandler);

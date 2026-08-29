@@ -39,6 +39,7 @@ const registerUser = async (req, res, next) => {
     const { password: _, __v, ...safeUser } = user.toObject();
 
     return res.status(201).json({
+      success: true,
       message: "Registration successful",
       user: safeUser,
     });
@@ -87,7 +88,7 @@ const loginUser = async (req, res, next) => {
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .json({ message: "Login successful", user: safeUser });
+      .json({ success: true, message: "Login successful", user: safeUser });
   } catch (error) {
     next(error);
   }
@@ -97,7 +98,7 @@ const logoutUser = (req, res) => {
   return res
     .status(200)
     .clearCookie("token")
-    .json({ message: "Logout successful" });
+    .json({ success: true, message: "Logout successful" });
 };
 
 export { registerUser, loginUser, logoutUser };
