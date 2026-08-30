@@ -88,7 +88,7 @@ const loginUser = async (req, res, next) => {
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .json({ success: true, message: "Login successful", user: safeUser });
+      .json({ success: true, message: "Login successful", token, user: safeUser });
   } catch (error) {
     next(error);
   }

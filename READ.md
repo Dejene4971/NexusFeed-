@@ -55,6 +55,14 @@ GET /api/v1/posts/getPosts?page=1&limit=10&search=hello&sort=newest
 
 ## Testing
 
+Open the interactive Swagger documentation while the API is running:
+
+```text
+http://localhost:4000/api-docs
+```
+
+Use the **Authorize** button to provide a JWT bearer token when testing protected endpoints.
+
 Run the database-independent API tests:
 
 ```powershell
