@@ -17,6 +17,9 @@
   "scripts": {
     "start": "node backend/src/index.js",
     "dev": "nodemon backend/src/index.js",
+    "dev:backend": "nodemon backend/src/index.js",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
     "test": "node --test",
     "test:db": "cross-env RUN_DB_TESTS=true node --test"
   },

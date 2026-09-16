@@ -76,3 +76,44 @@ npm run test:db
 ```
 
 The database test command requires a reachable `MONGODB_URI`. Use a separate test database to avoid changing development data.
+
+## Frontend (React + Vite)
+
+The frontend is built with React 19, Vite, and custom CSS design system located in `/frontend`.
+
+### Running the Frontend
+
+Install dependencies (if not already installed):
+
+```powershell
+cd frontend
+npm install
+```
+
+Start the Vite development server with proxy:
+
+```powershell
+npm run dev
+```
+
+Or from the project root:
+
+```powershell
+npm run dev:frontend
+```
+
+Open `http://localhost:5173` in your browser.
+
+### Frontend Features
+
+- **JWT Authentication Flow**: Tabbed Modal supporting Registration, Login, and secure session persistence in `localStorage`.
+- **Full CRUD Feed**:
+  - Browse public posts with server-side pagination (Next/Prev and page buttons).
+  - Search filter with debouncing matching post title and description.
+  - Sort toggle (`newest` / `oldest`).
+  - Read full post details modal with author and metadata.
+  - Create new posts with client-side validation.
+  - Edit and Delete posts (restricted to author-owned posts).
+- **Live Health Monitoring**: Real-time ping to the `/health` endpoint displaying connection status and latency.
+- **Modern Theme System**: One-click light/dark mode switcher with glassmorphism aesthetics and custom typography (Outfit & Inter).
+- **Toast Notifications**: Interactive status alerts for all actions.
