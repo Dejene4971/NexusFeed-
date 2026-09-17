@@ -73,6 +73,23 @@ describe("API with MongoDB", () => {
     assert.equal(response.status, 403);
   });
 
+  test("prevents mass-assignment of author during update", async () => {
+    const updateResponse = await jsonRequest(`/api/v1/posts/updatePost/${janePostId}`, "PATCH", {
+      age: 27,
+      author: "000000000000000000000000",
+    }, janeCookie);
+    assert.equal(updateResponse.status, 200);
+    const updatedData = (await updateResponse.json()).data;
+    assert.notEqual(String(updatedData.author), "000000000000000000000000");
+  });
+
+  test("safely handles special regex characters in search query", async () => {
+    const response = await request("/api/v1/posts/getPosts?search=[.*+?^${}()");
+    assert.equal(response.status, 200);
+    const result = await response.json();
+    assert.equal(result.success, true);
+  });
+
   test("allows the owner to update and delete the post", async () => {
     const updateResponse = await jsonRequest(`/api/v1/posts/updatePost/${janePostId}`, "PATCH", { age: 26 }, janeCookie);
     assert.equal(updateResponse.status, 200);

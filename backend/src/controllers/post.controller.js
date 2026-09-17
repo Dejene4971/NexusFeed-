@@ -38,9 +38,10 @@ const getAllPosts = async (req, res, next) => {
 
         let query = {};
         if (search) {
+          const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
           query.$or = [
-            { name: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } },
+            { name: { $regex: escapedSearch, $options: "i" } },
+            { description: { $regex: escapedSearch, $options: "i" } },
           ];
         }
 
@@ -98,40 +99,35 @@ const getPostById = async (req, res, next) => {
 
 const updatePost = async (req, res, next) => {
     try {
-        //basic validation
+        const { name, description, age } = req.body || {};
+        const updateData = {};
+        if (name !== undefined) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (age !== undefined) updateData.age = age;
 
-        //{ name:x, description:y, age:z} -> [name, description, age]
-        //Object.keys(req.body) -> [name, description, age]
-        //{}= truthy, []= falsy, [name, description, age] = truthy
-
-        if(Object.keys(req.body).length === 0){
+        if (Object.keys(updateData).length === 0) {
             return res.status(400).json({
-                message: "At least one field is required for update"
+                message: "At least one field is required for update",
             });
         }
 
-       /*       const post = await Post.findByIdAndUpdate(req.params.id, req.body, {new:true});
-       
-       req.params.id -> /updatePost/:id = is the post id that we want to update from the url.
-       req.body -> { name:x, description:y, age:z} = is the data that we want to update in the post.
-       {new:true} -> is an option that tells mongoose to return the updated document instead of the old one.          
- */
-        const post = await Post.findByIdAndUpdate(req.params.id, req.body, {new:true});
-        if(!post){
+        const post = await Post.findByIdAndUpdate(req.params.id, updateData, {
+            new: true,
+            runValidators: true,
+        });
+        if (!post) {
             return res.status(404).json({
-                message: "Post not found"
+                message: "Post not found",
             });
         }
         res.status(200).json({
             success: true,
             message: "post updated successfully",
-            data: post
-        })
-
+            data: post,
+        });
     } catch (error) {
         next(error);
     }
-    
 };
 const deletePost = async (req, res, next) => {
     try {
